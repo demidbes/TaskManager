@@ -49,7 +49,7 @@ function addTask() {
   isModalOpen.value = false
 }
 
-function onDragStart(event: DragEvent, taskId: string, columnId: string) {
+function onDragStart(_event: DragEvent, taskId: string, columnId: string) {
   dragTaskId.value = taskId
   dragFromColumnId.value = columnId
 }
