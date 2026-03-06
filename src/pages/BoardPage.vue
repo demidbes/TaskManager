@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBoardStore } from '@/stores/boardStore'
-import type { Priority } from '@/types'
-import BaseModal from '@/components/ui/BaseModal.vue'
+import type { Task } from '@/types'
+import TaskCreateEdit from '@/components/ui/TaskCreateEdit.vue'
 
 const store = useBoardStore()
 const route = useRoute()
 
 const isModalOpen = ref(false)
+const selectedTask = ref<Task | null>(null)
+const selectedColumnId = ref('')
 
 const boardId = route.params.id as string
 const board = store.getBoardById(boardId)
-const firstColumnId = board?.columns[0]?.id ?? ''
 
 const dragTaskId = ref('')
 const dragFromColumnId = ref('')
@@ -31,43 +32,31 @@ const priorityLabel: Record<string, string> = {
   high: 'Высокий',
 }
 
-const taskData = reactive({
-  title: '',
-  description: '',
-  priority: 'low' as Priority,
-  deadline: '',
-})
-
-function clearTaskData() {
-  Object.assign(taskData, { title: '', description: '', priority: 'low', deadline: '' })
+// Создать таску
+function createTask() {
+  selectedTask.value = null
+  selectedColumnId.value = board?.columns[0]?.id ?? ''
+  isModalOpen.value = true
 }
 
-function addTask() {
-  store.addTask(
-    boardId,
-    firstColumnId,
-    taskData.title,
-    taskData.description,
-    taskData.priority,
-    taskData.deadline,
-  )
-  clearTaskData()
-  isModalOpen.value = false
-}
-
+// Перетаскивание тасок по колонкам
 function onDragStart(_event: DragEvent, taskId: string, columnId: string) {
   dragTaskId.value = taskId
   dragFromColumnId.value = columnId
 }
-
 function onDragOver(event: DragEvent) {
   event.preventDefault()
 }
-
 function onDrop(columnId: string) {
   store.moveTask(boardId, dragFromColumnId.value, columnId, dragTaskId.value)
   dragTaskId.value = ''
   dragFromColumnId.value = ''
+}
+// Редактирование такси
+function editTask(task: Task, columnId: string) {
+  selectedTask.value = task
+  selectedColumnId.value = columnId
+  isModalOpen.value = true
 }
 </script>
 
@@ -78,7 +67,7 @@ function onDrop(columnId: string) {
         <span class="text-xl font-normal text-gray-800">Доска:</span> {{ board.title }}
       </h2>
       <button
-        @click="isModalOpen = true"
+        @click="createTask()"
         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer"
       >
         Создать задачу
@@ -123,60 +112,31 @@ function onDrop(columnId: string) {
             <span class="text-sm text-gray-500">Дедлайн:</span>
             {{ task.deadline ? new Date(task.deadline).toLocaleDateString('ru-RU') : '—' }}
           </p>
-          <button
-            class="text-sm text-red-500 hover:text-red-700 cursor-pointer mt-auto self-end"
-            @click="store.deleteTask(boardId, column.id, task.id)"
-            type="button"
-          >
-            Удалить
-          </button>
+          <div class="flex gap-4 self-end">
+            <button
+              class="text-sm text-blue-500 hover:text-blue-700 cursor-pointer"
+              @click="editTask(task, column.id)"
+            >
+              Редактировать
+            </button>
+            <button
+              class="text-sm text-red-500 hover:text-red-700 cursor-pointer mt-auto"
+              @click="store.deleteTask(boardId, column.id, task.id)"
+              type="button"
+            >
+              Удалить
+            </button>
+          </div>
         </div>
       </div>
     </div>
     <!-- Создать таску-->
-    <BaseModal v-model:open="isModalOpen" title="Создать таску">
-      <form class="flex flex-col gap-4" @submit.prevent="addTask">
-        <label class="flex gap-2 text-sm text-gray-700 text-nowrap items-start"
-          >Название:
-          <input
-            class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full"
-            required
-            v-model="taskData.title"
-            type="text"
-        /></label>
-        <label class="flex gap-2 text-sm text-gray-700 text-nowrap items-start"
-          >Описание:
-          <textarea
-            class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full"
-            v-model="taskData.description"
-          ></textarea>
-        </label>
-        <label class="flex gap-2 text-sm text-gray-700 text-nowrap items-start">
-          Приоритет:
-          <select
-            class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full"
-            v-model="taskData.priority"
-          >
-            <option value="low">Низкий</option>
-            <option value="medium">Средний</option>
-            <option value="high">Высокий</option>
-          </select>
-        </label>
-
-        <label class="flex gap-2 text-sm text-gray-700 text-nowrap items-start"
-          >Дедлайн:
-          <input
-            class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full"
-            v-model="taskData.deadline"
-            type="date"
-        /></label>
-        <button
-          class="text-white bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer"
-        >
-          Создать
-        </button>
-      </form>
-    </BaseModal>
+    <TaskCreateEdit
+      v-model:open="isModalOpen"
+      :boardId="boardId"
+      :columnId="selectedColumnId"
+      :task="selectedTask"
+    ></TaskCreateEdit>
   </div>
   <div v-else>Доска не найдена, или не существует</div>
 </template>

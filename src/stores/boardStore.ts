@@ -5,7 +5,7 @@ import { getBoards, saveBoards, generateId } from '@/services/storageService'
 
 export const useBoardStore = defineStore('board', () => {
   const boards = ref<Board[]>(getBoards())
-
+  // Добавить доску
   function addBoard(title: string): void {
     const board: Board = {
       id: generateId(),
@@ -20,13 +20,16 @@ export const useBoardStore = defineStore('board', () => {
     boards.value.push(board)
     saveBoards(boards.value)
   }
+  // Удалить доску
   function deleteBoard(boardId: string): void {
     boards.value = boards.value.filter((b: Board) => b.id !== boardId)
     saveBoards(boards.value)
   }
+  // Получение доски по id
   function getBoardById(boardId: string) {
     return boards.value.find((b: Board) => b.id === boardId)
   }
+  // Добавить таску
   function addTask(
     boardId: string,
     columnId: string,
@@ -55,6 +58,7 @@ export const useBoardStore = defineStore('board', () => {
     column.tasks.push(task)
     saveBoards(boards.value)
   }
+  // Удалить таску
   function deleteTask(boardId: string, columnId: string, taskId: string) {
     const board = getBoardById(boardId)
     if (!board) return
@@ -65,6 +69,7 @@ export const useBoardStore = defineStore('board', () => {
     column.tasks = column.tasks.filter((t: Task) => t.id !== taskId)
     saveBoards(boards.value)
   }
+  // Переместить таску в другую колонку
   function moveTask(boardId: string, fromColumnId: string, toColumnId: string, taskId: string) {
     const board = getBoardById(boardId)
     if (!board) return
@@ -80,5 +85,24 @@ export const useBoardStore = defineStore('board', () => {
     toColumn.tasks.push(task)
     saveBoards(boards.value)
   }
-  return { boards, addBoard, deleteBoard, getBoardById, addTask, deleteTask, moveTask }
+  // Редактировать такску
+  function updateTask(
+    boardId: string,
+    columnId: string,
+    taskId: string,
+    data: Omit<Task, 'id' | 'createdAt'>,
+  ) {
+    const board = getBoardById(boardId)
+    if (!board) return
+
+    const column = board.columns.find((c) => c.id === columnId)
+    if (!column) return
+
+    const task = column.tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    Object.assign(task, data)
+    saveBoards(boards.value)
+  }
+  return { boards, addBoard, deleteBoard, getBoardById, addTask, deleteTask, moveTask, updateTask }
 })
