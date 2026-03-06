@@ -25,6 +25,12 @@ const priorityBadge: Record<string, string> = {
   high: 'bg-red-100 text-red-700',
 }
 
+const priorityLabel: Record<string, string> = {
+  low: 'Низкий',
+  medium: 'Средний',
+  high: 'Высокий',
+}
+
 const taskData = reactive({
   title: '',
   description: '',
@@ -110,7 +116,7 @@ function onDrop(columnId: string) {
             <span
               class="text-sm px-2 py-0.5 rounded-full w-fit ml-2"
               :class="priorityBadge[task.priority]"
-              >{{ task.priority }}</span
+              >{{ priorityLabel[task.priority] }}</span
             >
           </p>
           <p>
