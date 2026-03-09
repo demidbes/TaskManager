@@ -85,7 +85,7 @@ export const useBoardStore = defineStore('board', () => {
     toColumn.tasks.push(task)
     saveBoards(boards.value)
   }
-  // Редактировать такску
+  // Редактировать таску
   function updateTask(
     boardId: string,
     columnId: string,
@@ -104,5 +104,22 @@ export const useBoardStore = defineStore('board', () => {
     Object.assign(task, data)
     saveBoards(boards.value)
   }
-  return { boards, addBoard, deleteBoard, getBoardById, addTask, deleteTask, moveTask, updateTask }
+  // Редактировать заголовок доски
+  function updateBoardTitle(boardId: string, newTitle: string) {
+    const board = getBoardById(boardId)
+    if (!board) return
+    board.title = newTitle
+    saveBoards(boards.value)
+  }
+  return {
+    boards,
+    addBoard,
+    deleteBoard,
+    getBoardById,
+    addTask,
+    deleteTask,
+    moveTask,
+    updateTask,
+    updateBoardTitle,
+  }
 })

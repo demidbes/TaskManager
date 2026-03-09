@@ -6,10 +6,24 @@ const store = useBoardStore()
 const newBoardTitle = ref('')
 const isModalOpen = ref(false)
 
+const boardEditId = ref('')
+const boardEditTitle = ref('')
+
 function addBoard(title: string) {
   store.addBoard(title)
   newBoardTitle.value = ''
   isModalOpen.value = false
+}
+
+function editBoardTitle(boardId: string, currentTitle: string) {
+  boardEditId.value = boardId
+  boardEditTitle.value = currentTitle
+}
+
+function saveBoardTitle() {
+  store.updateBoardTitle(boardEditId.value, boardEditTitle.value)
+  boardEditId.value = ''
+  boardEditTitle.value = ''
 }
 </script>
 
@@ -44,8 +58,44 @@ function addBoard(title: string) {
       <article
         class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col gap-3 h-full"
       >
-        <h3 class="break-words text-lg font-semibold text-gray-800">
+        <form class="flex gap-3" @submit.prevent="saveBoardTitle" v-if="boardEditId === board.id">
+          <input
+            class="text-lg font-semibold text-gray-800 w-auto border-0 border-b-2 border-black outline-none pr-2"
+            v-model="boardEditTitle"
+            autofocus
+            :size="boardEditTitle.length || 1"
+          />
+          <button class="text-green-600 text-lg cursor-pointer">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+          </button>
+        </form>
+        <h3 v-else class="flex gap-3 break-words text-lg font-semibold text-gray-800">
           {{ board.title }}
+          <button class="text-blue-600" @click="editBoardTitle(board.id, board.title)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+              />
+            </svg>
+          </button>
         </h3>
         <p>
           <span class="text-sm text-gray-500">Добавлена:</span>

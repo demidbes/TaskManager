@@ -18,6 +18,8 @@ const board = store.getBoardById(boardId)
 const dragTaskId = ref('')
 const dragFromColumnId = ref('')
 
+const editingBoardTitle = ref('')
+
 const columnColor = ['border-blue-400', 'border-yellow-400', 'border-green-400']
 
 const priorityBadge: Record<string, string> = {
@@ -58,14 +60,61 @@ function editTask(task: Task, columnId: string) {
   selectedColumnId.value = columnId
   isModalOpen.value = true
 }
+// Редактирование назвния доски
+function editBoardTitle(currentTitle: string) {
+  editingBoardTitle.value = currentTitle
+}
+
+function saveBoardTitle() {
+  store.updateBoardTitle(boardId, editingBoardTitle.value)
+  editingBoardTitle.value = ''
+}
 </script>
 
 <template>
   <div v-if="board">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold">
-        <span class="text-xl font-normal text-gray-800">Доска:</span> {{ board.title }}
-      </h2>
+      <form @submit.prevent="saveBoardTitle()" class="flex gap-3" v-if="editingBoardTitle">
+        <input
+          v-model="editingBoardTitle"
+          type="text"
+          autofocus
+          :size="editingBoardTitle.length || 1"
+          class="text-2xl font-bold border-0 border-b-2 border-black outline-none pr-2"
+        />
+        <button class="text-green-600 text-lg cursor-pointer">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+        </button>
+      </form>
+      <div class="flex gap-3" v-else>
+        <h2 class="text-2xl font-bold">{{ board.title }}</h2>
+        <button class="text-blue-600" @click="editBoardTitle(board.title)">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+            />
+          </svg>
+        </button>
+      </div>
+
       <button
         @click="createTask()"
         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer"
