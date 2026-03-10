@@ -54,13 +54,13 @@ function onDrop(columnId: string) {
   dragTaskId.value = ''
   dragFromColumnId.value = ''
 }
-// Редактирование такси
+// Редактирование таски
 function editTask(task: Task, columnId: string) {
   selectedTask.value = task
   selectedColumnId.value = columnId
   isModalOpen.value = true
 }
-// Редактирование назвния доски
+// Редактирование названия доски
 function editBoardTitle(currentTitle: string) {
   editingBoardTitle.value = currentTitle
 }

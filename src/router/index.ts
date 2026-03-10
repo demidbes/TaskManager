@@ -1,10 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '@/pages/HomePage.vue'
-import BoardPage from '@/pages/BoardPage.vue'
 
 const routes = [
-    {path: '/', component: HomePage},
-     {path: '/board/:id', component: BoardPage},
+  {
+    path: '/',
+    component: () => import('@/pages/HomePage.vue'),
+  },
+  {
+    path: '/board/:id',
+    component: () => import('@/pages/BoardPage.vue'),
+  },
 ]
 
 const router = createRouter({
